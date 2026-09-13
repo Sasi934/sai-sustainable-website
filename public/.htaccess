@@ -1,0 +1,99 @@
+# SAI Sustainable Services — Apache/LiteSpeed config for the static export.
+# Upload alongside the exported site. Everything the Next config used to do at
+# runtime happens here instead.
+
+# -Indexes: a static export writes both `contact-us.html` and a `contact-us/`
+# directory of RSC payloads. Without this, a trailing slash returns a browsable
+# listing of those internals instead of the page.
+Options -Indexes -MultiViews
+RewriteEngine On
+
+# ---------------------------------------------------------------------------
+# HTTPS everywhere — but keep whatever host was asked for, so this works on the
+# *.hostingersite.com staging URL as well as on the live domain.
+# ---------------------------------------------------------------------------
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# ---------------------------------------------------------------------------
+# Canonicalise on www — scoped to saisustainable.com only. Applying it to every
+# host would bounce the staging URL to a www.* subdomain that does not exist.
+# ---------------------------------------------------------------------------
+RewriteCond %{HTTP_HOST} ^saisustainable\.com$ [NC]
+RewriteRule ^(.*)$ https://www.saisustainable.com/$1 [R=301,L]
+
+# ---------------------------------------------------------------------------
+# Staging must never be indexed, or it competes with production in search.
+# Applies automatically on any *.hostingersite.com host and nowhere else.
+# ---------------------------------------------------------------------------
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase Host hostingersite\.com IS_STAGING=1
+</IfModule>
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow" env=IS_STAGING
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Convenience aliases → canonical paths. These carry the local-search rankings,
+# so they always 301 INTO the long geo slugs, never the other way round.
+# ---------------------------------------------------------------------------
+Redirect 301 /environmental /environmental-abatement-halifax-dartmouth-nova-scotia
+Redirect 301 /construction  /renovation-and-construction-dartmouth-halifax-general-contractors
+Redirect 301 /restoration   /restoration-and-cleaning-dartmouth-halifax-nova-scotia
+Redirect 301 /waste         /waste-and-disposal-services-halifax-dartmouth-nova-scotia
+Redirect 301 /demolition    /demolition-and-labor-support-halifax-dartmouth-nova-scotia
+Redirect 301 /about         /about-us
+Redirect 301 /contact       /contact-us
+Redirect 301 /insights      /blog-list
+
+# ---------------------------------------------------------------------------
+# Trailing slash → canonical no-slash URL, whenever a matching .html exists.
+# /contact-us/ and /contact-us must not be two different things, and the former
+# must never fall through to the payload directory.
+# ---------------------------------------------------------------------------
+RewriteCond %{REQUEST_URI} !^/$
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteCond %{DOCUMENT_ROOT}%1.html -f
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# ---------------------------------------------------------------------------
+# Serve /services from services.html with no redirect and no trailing slash,
+# so every existing URL resolves byte-for-byte as it does today.
+# ---------------------------------------------------------------------------
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------------
+# Caching. Hashed build assets are immutable; HTML must always revalidate.
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType image/jpeg              "access plus 6 months"
+  ExpiresByType image/png               "access plus 6 months"
+  ExpiresByType image/webp              "access plus 6 months"
+  ExpiresByType image/avif              "access plus 6 months"
+  ExpiresByType font/woff2              "access plus 1 year"
+</IfModule>
+
+<FilesMatch "\.html$">
+  Header set Cache-Control "public, max-age=0, must-revalidate"
+</FilesMatch>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Baseline security headers.
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
