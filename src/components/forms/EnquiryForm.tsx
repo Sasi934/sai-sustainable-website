@@ -26,7 +26,7 @@ export default function EnquiryForm() {
 
     try {
       // Static export has no route handlers; this is the PHP endpoint in public/.
-      const res = await fetch("/enquiry.php", {
+      const res = await fetch("/api/enquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
