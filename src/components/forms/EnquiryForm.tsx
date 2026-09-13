@@ -18,34 +18,85 @@ export default function EnquiryForm() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("sending");
+
+    setStatus("idle");
     setErrors({});
     setMessage("");
 
-    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    // Frontend validation
+    const validationErrors: Errors = {};
+
+    if (!String(data.name ?? "").trim()) {
+      validationErrors.name = "Please enter your first name.";
+    }
+
+    if (!String(data.lastName ?? "").trim()) {
+      validationErrors.lastName = "Please enter your last name.";
+    }
+
+    if (!String(data.telephone ?? "").trim()) {
+      validationErrors.telephone = "Please enter your telephone number.";
+    }
+
+    const email = String(data.email ?? "").trim();
+
+    if (!email) {
+      validationErrors.email = "Please enter your email address.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      validationErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!String(data.message ?? "").trim()) {
+      validationErrors.message = "Please enter your message.";
+    }
+
+    // Stop here if validation fails
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setStatus("error");
+      setMessage("Please check the highlighted fields and try again.");
+      return;
+    }
+
+    setStatus("sending");
 
     try {
-      // Static export has no route handlers; this is the PHP endpoint in public/.
       const res = await fetch("/api/enquiry", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
+
       const json = await res.json();
 
       if (!res.ok) {
         setErrors(json.errors ?? {});
         setStatus("error");
-        setMessage(json.error ?? "Please check the highlighted fields and try again.");
+        setMessage(
+          json.error ??
+            "Please check the highlighted fields and try again."
+        );
         return;
       }
 
       setStatus("sent");
-      setMessage("Thank you — we've received your enquiry and will be in touch.");
-      e.currentTarget.reset();
-    } catch {
+      setMessage(
+        "Thank you — we've received your enquiry and will be in touch."
+      );
+
+      form.reset();
+    } catch (error) {
+      console.error("Enquiry submission error:", error);
+
       setStatus("error");
-      setMessage("We couldn't send that just now. Please call us on +1(902) 452-7600.");
+      setMessage(
+        "We couldn't send that just now. Please call us on +1(902) 452-7600."
+      );
     }
   }
 
@@ -53,9 +104,12 @@ export default function EnquiryForm() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-7">
-      {/* Which division the enquiry is for — brief §23. */}
+      {/* Which division the enquiry is for */}
       <fieldset className="border-0 p-0">
-        <legend className="eyebrow text-on-light-faint">What do you need?</legend>
+        <legend className="eyebrow text-on-light-faint">
+          What do you need?
+        </legend>
+
         <div className="mt-4 flex flex-wrap gap-2">
           {enquiryDivisions.map((d, i) => (
             <label
@@ -75,26 +129,90 @@ export default function EnquiryForm() {
         </div>
       </fieldset>
 
+      {/* Required fields */}
       <div className="grid gap-7 sm:grid-cols-2">
-        <Field id={`${id}-name`} name="name" label={f.name} required error={errors.name} />
-        <Field id={`${id}-last`} name="lastName" label={f.lastName} required error={errors.lastName} />
-        <Field id={`${id}-tel`} name="telephone" label={f.telephone} type="tel" required error={errors.telephone} />
-        <Field id={`${id}-email`} name="email" label={f.email} type="email" required error={errors.email} />
+        <Field
+          id={`${id}-name`}
+          name="name"
+          label={f.name}
+          required
+          error={errors.name}
+        />
+
+        <Field
+          id={`${id}-last`}
+          name="lastName"
+          label={f.lastName}
+          required
+          error={errors.lastName}
+        />
+
+        <Field
+          id={`${id}-tel`}
+          name="telephone"
+          label={f.telephone}
+          type="tel"
+          required
+          error={errors.telephone}
+        />
+
+        <Field
+          id={`${id}-email`}
+          name="email"
+          label={f.email}
+          type="email"
+          required
+          error={errors.email}
+        />
       </div>
 
+      {/* Message */}
       <div>
-        <label htmlFor={`${id}-msg`} className="eyebrow text-on-light-faint">
+        <label
+          htmlFor={`${id}-msg`}
+          className="eyebrow text-on-light-faint"
+        >
           {f.message}
+          <span aria-hidden="true"> *</span>
         </label>
-        <textarea id={`${id}-msg`} name="message" rows={5} className={`${field} mt-2 resize-y`} />
+
+        <textarea
+          id={`${id}-msg`}
+          name="message"
+          rows={5}
+          aria-invalid={errors.message ? true : undefined}
+          aria-describedby={errors.message ? `${id}-msg-err` : undefined}
+          className={`${field} mt-2 resize-y ${
+            errors.message ? "border-[#9E2F26]" : ""
+          }`}
+        />
+
+        {errors.message && (
+          <p
+            id={`${id}-msg-err`}
+            className="mt-2 text-[0.82rem] text-[#9E2F26]"
+          >
+            {errors.message}
+          </p>
+        )}
       </div>
 
-      {/* Honeypot. Hidden from people and from assistive tech, visible to bots. */}
-      <div aria-hidden="true" className="absolute left-[-9999px] h-px w-px overflow-hidden">
+      {/* Honeypot — hidden from users and assistive technology */}
+      <div
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-px w-px overflow-hidden"
+      >
         <label htmlFor={`${id}-co`}>Company</label>
-        <input id={`${id}-co`} name="company" tabIndex={-1} autoComplete="off" />
+
+        <input
+          id={`${id}-co`}
+          name="company"
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
+      {/* Submit */}
       <div className="flex flex-wrap items-center gap-6">
         <button
           type="submit"
@@ -109,7 +227,9 @@ export default function EnquiryForm() {
           role="status"
           aria-live="polite"
           className={`text-[0.9rem] ${
-            status === "error" ? "text-[#9E2F26]" : "text-forest-600"
+            status === "error"
+              ? "text-[#9E2F26]"
+              : "text-forest-600"
           }`}
         >
           {message}
@@ -136,10 +256,17 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="eyebrow text-on-light-faint">
+      <label
+        htmlFor={id}
+        className="eyebrow text-on-light-faint"
+      >
         {label}
-        {required && <span aria-hidden="true"> *</span>}
+
+        {required && (
+          <span aria-hidden="true"> *</span>
+        )}
       </label>
+
       <input
         id={id}
         name={name}
@@ -147,10 +274,16 @@ function Field({
         required={required}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-err` : undefined}
-        className={`${field} mt-2 ${error ? "border-[#9E2F26]" : ""}`}
+        className={`${field} mt-2 ${
+          error ? "border-[#9E2F26]" : ""
+        }`}
       />
+
       {error && (
-        <p id={`${id}-err`} className="mt-2 text-[0.82rem] text-[#9E2F26]">
+        <p
+          id={`${id}-err`}
+          className="mt-2 text-[0.82rem] text-[#9E2F26]"
+        >
           {error}
         </p>
       )}
