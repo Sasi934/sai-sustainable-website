@@ -21,24 +21,14 @@ export const company = {
 } as const;
 
 /**
- * Opening title sequence.
- *
- * ⚠️ NOT FROM AN APPROVED SOURCE. "SAI GROUPS" appears in neither the live site
- * nor SAI_Experience_Web Dev.docx — both name the company "SAI Sustainable
- * Services Inc." This wording was directed by SAI on 2026-09-11 and is recorded
- * here rather than in CONTENT-LOCK.md for exactly that reason.
- *
- * The caption is a variation on the approved homepage tagline
- * ("Restoration • Abatement • Construction"), with the middle term changed to
- * name the IT division — directed by SAI 2026-09-11. It names the three
- * divisions rather than the environmental services alone, which is consistent
- * with "SAI GROUPS" reading as the parent brand. Also not source-approved.
+ * Group identity — brief 2026-09-14 (D-07). Supersedes the 2026-09-11 "SAI GROUPS"
+ * title sequence, which was retired: the brief specifies a hero sequence that
+ * starts from a dark base, and a full-screen title card in front of it delayed
+ * the five-second read of "one group, three divisions".
  */
-export const intro = {
-  title: "SAI GROUPS",
-  caption: "Restoration • IT Sector • Construction",
-  /** Total time the overlay holds before it clears, in seconds. */
-  duration: 1.6,
+export const group = {
+  name: "SAI Group",
+  divisionsLine: "Environmental, Restoration & Manpower · EXIM · IT Solutions",
 } as const;
 
 export const contact = {

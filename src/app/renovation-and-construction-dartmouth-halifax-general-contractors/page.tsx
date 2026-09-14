@@ -21,13 +21,16 @@ export default function Page() {
       <JsonLd
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
-          { name: "Services", path: "/services" },
+          { name: "Environmental, Restoration & Manpower", path: "/environmental-restoration-manpower" },
           { name: group.name, path: PATH },
         ])}
       />
       <ServiceGroupPage
         group={group}
-        scene="massing"
+        band={{
+          image: "/img/interior-exterior-renovations-halifax-dartmouth-nova-scotia-TBQO6cLMFJ9ByMBb.jpg",
+          imageAlt: "Interior and exterior upgrade work on a Nova Scotia property",
+        }}
         sceneHeading="Structure, in sequence."
         sceneBody="Every build resolves in an order — frame, envelope, finish. The same discipline applies whether it is a single room or a full rebuild."
       />

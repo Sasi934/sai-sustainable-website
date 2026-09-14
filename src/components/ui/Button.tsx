@@ -10,8 +10,13 @@ type Props = {
   className?: string;
 };
 
+/**
+ * Squared, refined corporate buttons. Colour comes from the nearest
+ * [data-division] ancestor, so the same component is forest on Environmental,
+ * gold on EXIM and teal on IT without a prop.
+ */
 const base =
-  "relative inline-flex items-center gap-3 px-7 py-3.5 text-[0.82rem] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 rounded-[2px]";
+  "group/btn relative inline-flex items-center justify-center gap-3 px-6 py-3.5 text-[0.78rem] font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,color] duration-300 rounded-[2px] sm:px-7";
 
 export default function Button({
   href,
@@ -22,39 +27,45 @@ export default function Button({
 }: Props) {
   const styles: Record<Variant, string> = {
     solid: onDark
-      ? "bg-on-dark text-ink hover:bg-champagne"
-      : "bg-forest-600 text-on-dark hover:bg-forest-700",
+      ? "bg-btn-dark text-btn-dark-ink hover:bg-btn-dark-hover"
+      : "bg-btn-light text-btn-light-ink hover:bg-btn-light-hover",
     outline: onDark
-      ? "border border-line-dark text-on-dark hover:border-champagne hover:text-champagne"
-      : "border border-line-light text-on-light hover:border-forest-600 hover:text-forest-600",
+      ? "border border-on-dark/30 text-on-dark hover:border-signal hover:text-signal"
+      : "border border-on-light/25 text-on-light hover:border-signal-ink hover:text-signal-ink",
     ghost: onDark
       ? "text-on-dark-muted hover:text-on-dark"
-      : "text-on-light-muted hover:text-forest-600",
+      : "text-on-light-muted hover:text-signal-ink",
   };
 
-  const external = href.startsWith("http");
+  const cls = `${base} ${styles[variant]} ${className}`;
   const inner = (
     <>
       <span>{children}</span>
-      <span aria-hidden="true" className="translate-y-[1px]">
+      <span
+        aria-hidden="true"
+        className="translate-y-px transition-transform duration-500 ease-luxe group-hover/btn:translate-x-1"
+      >
         &rarr;
       </span>
     </>
   );
 
+  const web = href.startsWith("http");
+  // tel:, mailto: and in-page anchors are plain links — no client routing, no prefetch.
+  const plain = web || href.startsWith("tel:") || href.startsWith("mailto:") || href.startsWith("#");
+
   return (
-    <Magnetic strength={0.22}>
-      {external ? (
+    <Magnetic strength={0.18}>
+      {plain ? (
         <a
           href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${base} ${styles[variant]} ${className}`}
+          className={cls}
+          {...(web ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         >
           {inner}
         </a>
       ) : (
-        <Link href={href} className={`${base} ${styles[variant]} ${className}`}>
+        <Link href={href} className={cls}>
           {inner}
         </Link>
       )}

@@ -9,7 +9,7 @@ import { JsonLd, breadcrumbSchema } from "@/lib/schema";
 import { posts } from "@/data/insights";
 
 export const metadata: Metadata = pageMeta({
-  title: "Insights",
+  title: "Blog",
   description:
     "Practical guidance on mold remediation, water damage response, asbestos safety during renovation, and renovation upgrades that improve property value and energy efficiency.",
   path: "/blog-list",
@@ -17,16 +17,16 @@ export const metadata: Metadata = pageMeta({
 
 export default function Page() {
   return (
-    <>
+    <div data-division="environmental">
       <JsonLd
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
-          { name: "Insights", path: "/blog-list" },
+          { name: "Blog", path: "/blog-list" },
         ])}
       />
 
       <PageHero
-        eyebrow="Insights"
+        eyebrow="Blog"
         heading="Blogs"
         intro="Practical guidance from the people who do the work."
         image="/img/pexels-curtis-adams-1694007-4258279.jpg-RuCEWu2K2sAEWETi.jpeg"
@@ -62,7 +62,7 @@ export default function Page() {
                       {p.readingTime}
                     </p>
 
-                    <h2 className="display mt-3 text-h3 transition-colors group-hover:text-forest-600">
+                    <h2 className="display mt-3 text-h3 transition-colors group-hover:text-signal-ink">
                       {p.title}
                     </h2>
                     <p className="mt-4 max-w-[52ch] leading-relaxed text-on-light-muted">
@@ -81,6 +81,6 @@ export default function Page() {
         body="Certified, insured and available across Atlantic Canada."
         cta="Get a quote"
       />
-    </>
+    </div>
   );
 }

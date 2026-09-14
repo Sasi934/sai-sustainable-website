@@ -1,121 +1,89 @@
-"use client";
-
 import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { divisions } from "@/data/divisions";
-
-if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
+import Reveal from "@/components/ui/Reveal";
+import SectionHeading from "./SectionHeading";
+import HeroImage from "@/components/visual/HeroImage";
+import { divisions, getDivision, type Division } from "@/data/divisions";
+import { divisionsIntro } from "@/data/group";
 
 /**
- * 03 — Three portals.
+ * 03 — The three divisions.
  *
- * Composed mobile-first as a vertical narrative, then pinned and moved
- * horizontally on wide viewports — not the reverse, which is how pinned
- * sections usually end up broken on phones (survey §16).
- *
- * Numbered 01–03 because the divisions are an enumerated set the reader is
- * meant to hold as three, not because numbering looks editorial.
+ * Deliberately not three equal cards. IT Solutions, the strategic focus, takes
+ * the tall panel; Environmental and EXIM stack beside it. Each card wears its
+ * own palette through data-division, on a shared ivory ground, so the three
+ * identities read as distinct members of one family.
  */
 export default function Divisions() {
-  const section = useRef<HTMLElement>(null);
-  const track = useRef<HTMLUListElement>(null);
-
-  useEffect(() => {
-    const sec = section.current;
-    const rail = track.current;
-    if (!sec || !rail) return;
-
-    const mm = gsap.matchMedia();
-
-    // Pinning only above 1024px and only when motion is welcome. Below that the
-    // list stays a normal vertical stack and nothing is pinned.
-    mm.add(
-      "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
-      () => {
-        const distance = () => rail.scrollWidth - window.innerWidth;
-        if (distance() <= 0) return;
-
-        const tween = gsap.to(rail, {
-          x: () => -distance(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: sec,
-            start: "top top",
-            end: () => `+=${distance()}`,
-            pin: true,
-            scrub: 0.6,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        return () => {
-          tween.scrollTrigger?.kill();
-          tween.kill();
-          gsap.set(rail, { x: 0 });
-        };
-      },
-    );
-
-    return () => mm.revert();
-  }, []);
+  const it = getDivision("it");
+  const others = divisions.filter((d) => !d.focus);
 
   return (
-    <section ref={section} className="overflow-hidden bg-ink py-[var(--section)] text-on-dark lg:py-0">
-      <div className="container lg:flex lg:h-svh lg:flex-col lg:justify-center">
-        <div className="lg:shrink-0">
-          <p className="eyebrow text-champagne">One organisation</p>
-          <h2 className="display mt-5 max-w-[18ch] text-h1">
-            Three capabilities, one standard of delivery.
-          </h2>
-        </div>
+    <section id="divisions" aria-labelledby="divisions-heading" className="scroll-mt-20 bg-ivory pb-[var(--section)] text-on-light">
+      <div className="container">
+        <SectionHeading id="divisions-heading" eyebrow={divisionsIntro.eyebrow} heading={divisionsIntro.heading} body={divisionsIntro.body} />
 
-        <ul
-          ref={track}
-          className="mt-12 grid gap-px bg-line-dark lg:mt-14 lg:flex lg:w-max lg:gap-8 lg:bg-transparent"
-        >
-          {divisions.map((d) => (
-            <li
-              key={d.key}
-              className="group bg-ink lg:w-[clamp(22rem,32vw,30rem)] lg:shrink-0 lg:bg-transparent"
-            >
-              <Link
-                href={d.href}
-                className="flex h-full flex-col p-8 transition-colors duration-500 hover:bg-ink-raised lg:p-0 lg:hover:bg-transparent"
-              >
-                <div className="relative aspect-4/3 overflow-hidden">
-                  <Image
-                    src={d.image}
-                    alt={d.imageAlt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="object-cover opacity-70 transition-all duration-[1200ms] ease-luxe group-hover:scale-105 group-hover:opacity-100"
-                  />
-                </div>
-
-                <p className="eyebrow mt-8 text-on-dark-faint">{d.index}</p>
-                <h3 className="display mt-3 text-h3">{d.title}</h3>
-                <p className="mt-4 flex-1 text-[0.95rem] leading-relaxed text-on-dark-muted">
-                  {d.line}
-                </p>
-
-                <span className="eyebrow mt-8 inline-flex items-center gap-2 text-champagne">
-                  {d.name}
-                  <span
-                    aria-hidden="true"
-                    className="transition-transform duration-500 ease-luxe group-hover:translate-x-1.5"
-                  >
-                    &rarr;
-                  </span>
-                </span>
-              </Link>
-            </li>
+        <ul className="mt-14 grid gap-5 lg:grid-cols-12 lg:grid-rows-2">
+          <Reveal as="li" className="lg:col-span-7 lg:row-span-2">
+            <DivisionCard division={it} large />
+          </Reveal>
+          {others.map((d, i) => (
+            <Reveal as="li" key={d.key} delay={120 + i * 100} className="lg:col-span-5">
+              <DivisionCard division={d} />
+            </Reveal>
           ))}
         </ul>
       </div>
     </section>
+  );
+}
+
+function DivisionCard({ division: d, large = false }: { division: Division; large?: boolean }) {
+  return (
+    <article data-division={d.key} className="group relative flex h-full flex-col overflow-hidden bg-ink text-on-dark">
+      <div className={`relative overflow-hidden ${large ? "aspect-[4/3] lg:aspect-auto lg:min-h-[26rem] lg:flex-1" : "aspect-[16/8]"}`}>
+        <div className="absolute inset-0 transition-transform duration-[1400ms] ease-luxe group-hover:scale-[1.04]">
+          <HeroImage slot={d.key} sizes={large ? "(max-width: 1024px) 100vw, 58vw" : "(max-width: 1024px) 100vw, 42vw"} />
+        </div>
+        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink via-ink/20 to-transparent" />
+        {d.focus && (
+          <p className="eyebrow absolute left-6 top-6 bg-ink/70 px-3 py-1.5 text-signal backdrop-blur-sm lg:left-8 lg:top-8">
+            Strategic focus
+          </p>
+        )}
+      </div>
+
+      <div className={`flex flex-col ${large ? "p-6 lg:p-10" : "p-6 lg:p-8"}`}>
+        <p className="tnum eyebrow text-on-dark-faint">
+          {d.index} <span aria-hidden="true">·</span> {d.fullName}
+        </p>
+        <h3 className={`mt-3 font-semibold tracking-[-0.025em] ${large ? "text-h2 leading-[1.05]" : "text-h3 leading-tight"}`}>
+          <Link href={d.href} className="after:absolute after:inset-0 hover:text-signal">
+            {d.name}
+          </Link>
+        </h3>
+        <p className={`mt-4 leading-relaxed text-on-dark-muted ${large ? "max-w-[48ch] text-lede" : "text-[0.95rem]"}`}>
+          {d.line}
+        </p>
+
+        {large && (
+          <ul className="relative z-10 mt-7 flex flex-wrap gap-2">
+            {d.links.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="inline-block rounded-[2px] border border-line-dark px-3 py-1.5 text-[0.82rem] transition-colors hover:border-signal hover:text-signal">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <span className="eyebrow mt-7 inline-flex items-center gap-2 text-signal">
+          Explore {d.name}
+          <span aria-hidden="true" className="transition-transform duration-500 ease-luxe group-hover:translate-x-1.5">
+            &rarr;
+          </span>
+        </span>
+      </div>
+    </article>
   );
 }

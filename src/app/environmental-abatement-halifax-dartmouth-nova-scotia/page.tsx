@@ -21,7 +21,7 @@ export default function Page() {
       <JsonLd
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
-          { name: "Services", path: "/services" },
+          { name: "Environmental, Restoration & Manpower", path: "/environmental-restoration-manpower" },
           { name: group.name, path: PATH },
         ])}
       />

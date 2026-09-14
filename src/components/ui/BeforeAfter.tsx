@@ -107,7 +107,7 @@ export default function BeforeAfter({
         max={100}
         value={pos}
         onChange={(e) => setPos(Number(e.target.value))}
-        className="mt-4 w-full accent-[var(--forest-600)]"
+        className="mt-4 w-full accent-[var(--signal-ink)]"
       />
     </figure>
   );

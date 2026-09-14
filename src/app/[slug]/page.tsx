@@ -50,12 +50,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const others = posts.filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
-    <>
+    <div data-division="environmental">
       <JsonLd data={articleSchema(post)} />
       <JsonLd
         data={breadcrumbSchema([
           { name: "Home", path: "/" },
-          { name: "Insights", path: "/blog-list" },
+          { name: "Blog", path: "/blog-list" },
           { name: post.title, path: `/${post.slug}` },
         ])}
       />
@@ -75,9 +75,9 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             className="absolute inset-0 bg-linear-to-t from-ink via-ink/60 to-transparent"
           />
           <div className="relative container pb-[clamp(2.5rem,5vw,4rem)] pt-36">
-            <p className="eyebrow text-champagne">
+            <p className="eyebrow text-signal">
               <Link href="/blog-list" className="hover:text-on-dark">
-                Insights
+                Blog
               </Link>
               <span aria-hidden="true"> · </span>
               <time dateTime={post.date}>
@@ -106,7 +106,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
                 </Reveal>
               ))}
               <Reveal delay={200}>
-                <p className="mt-6 border-l-2 border-forest-600 pl-6 text-lede leading-relaxed text-on-light">
+                <p className="mt-6 border-l-2 border-signal-ink pl-6 text-lede leading-relaxed text-on-light">
                   {post.cta}
                 </p>
               </Reveal>
@@ -116,15 +116,15 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
         <section className="border-t border-line-light bg-ivory-raised py-[clamp(4rem,8vw,6rem)] text-on-light">
           <div className="container">
-            <p className="eyebrow text-on-light-faint">More insights</p>
+            <p className="eyebrow text-on-light-faint">More from the blog</p>
             <ul className="mt-8 grid gap-px bg-line-light md:grid-cols-3">
               {others.map((p) => (
                 <li key={p.slug} className="bg-ivory-raised">
                   <Link href={`/${p.slug}`} className="group flex h-full flex-col gap-4 p-6 transition-colors hover:bg-ivory">
-                    <span className="text-lede font-semibold leading-snug group-hover:text-forest-600">
+                    <span className="text-lede font-semibold leading-snug group-hover:text-signal-ink">
                       {p.title}
                     </span>
-                    <span aria-hidden="true" className="mt-auto text-forest-600">
+                    <span aria-hidden="true" className="mt-auto text-signal-ink">
                       &rarr;
                     </span>
                   </Link>
@@ -140,6 +140,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         body="Fully insured and certified, serving Nova Scotia, New Brunswick & PEI."
         cta="Get a quote"
       />
-    </>
+    </div>
   );
 }

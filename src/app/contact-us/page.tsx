@@ -8,9 +8,9 @@ import { contactPage } from "@/data/pages";
 import { contact, company, homepage } from "@/data/company";
 
 export const metadata: Metadata = pageMeta({
-  title: "Contact Us for Waste Solutions and Disposal - Sai Sustainable Services Inc.",
+  title: "Contact SAI Group — Get a Quote",
   description:
-    "Reach out to SAI Sustainable Services Inc. for waste solutions and disposal. Contact us and someone from our team will support your needs within an hour. Thank you!",
+    "Contact SAI Group for a quote: environmental restoration, abatement and manpower supply; EXIM sourcing, import and export; and IT solutions, AI and road defect detection. 24/7 emergency line +1(902) 452-7600.",
   path: "/contact-us",
 });
 
@@ -28,8 +28,11 @@ export default function Page() {
         eyebrow="Get in touch"
         heading={contactPage.heading}
         intro={contactPage.body[0]}
-        image="/img/environmental-drums-florida-scaled-YKbJQoW8D3HGyKZb.jpg"
-        imageAlt="Labelled drums staged for compliant transport"
+        slot="group"
+        crumbs={[
+          { name: "Home", href: "/" },
+          { name: "Contact", href: "/contact-us" },
+        ]}
       />
 
       <section className="bg-ivory py-[var(--section)] text-on-light">
@@ -51,11 +54,11 @@ export default function Page() {
                       <a
                         key={p.number}
                         href={p.href}
-                        className="text-lede transition-colors hover:text-forest-600"
+                        className="text-lede transition-colors hover:text-signal-ink"
                       >
                         {p.number}
                         {p.emergency && (
-                          <span className="ml-3 align-middle text-[0.68rem] uppercase tracking-[0.14em] text-forest-600">
+                          <span className="ml-3 align-middle text-[0.68rem] uppercase tracking-[0.14em] text-signal-ink">
                             24/7 emergency
                           </span>
                         )}
@@ -71,7 +74,7 @@ export default function Page() {
                       <a
                         key={e.address}
                         href={e.href}
-                        className="break-all transition-colors hover:text-forest-600"
+                        className="break-all transition-colors hover:text-signal-ink"
                       >
                         {e.address}
                       </a>
@@ -102,7 +105,7 @@ export default function Page() {
                     {homepage.why[2]} on{" "}
                     <a
                       href={contact.phones[0].href}
-                      className="text-on-light underline underline-offset-4 hover:text-forest-600"
+                      className="text-on-light underline underline-offset-4 hover:text-signal-ink"
                     >
                       {contact.phones[0].number}
                     </a>
@@ -120,9 +123,9 @@ export default function Page() {
             </Reveal>
           </div>
 
-          <div className="lg:col-span-6 lg:col-start-7">
+          <div id="enquiry" className="scroll-mt-24 lg:col-span-6 lg:col-start-7">
             <Reveal delay={80}>
-              <h2 className="eyebrow text-forest-600">{contactPage.quoteHeading}</h2>
+              <h2 className="eyebrow text-signal-ink">{contactPage.quoteHeading}</h2>
               <div className="mt-8">
                 <EnquiryForm />
               </div>

@@ -40,9 +40,31 @@ export const contactPage = {
   },
 } as const;
 
-/** Brief §23 — visitors identify which division they need. */
+/**
+ * Visitors identify which division they need. Values are the DivisionKey set
+ * (brief 2026-09-14). "construction" enquiries now route to environmental, the
+ * division that owns the preserved renovation and demolition pages.
+ */
 export const enquiryDivisions = [
-  { value: "environmental", label: "Environmental" },
-  { value: "it", label: "IT Services" },
-  { value: "construction", label: "Construction" },
+  { value: "environmental", label: "Environmental, Restoration & Manpower" },
+  { value: "exim", label: "EXIM" },
+  { value: "it", label: "IT Solutions" },
 ] as const;
+
+/**
+ * Enquiry intents that deep links can pre-select via `?type=`. The label is what
+ * lands in the email subject, so SAI can triage without opening the message.
+ */
+export const enquiryTypes = {
+  quote: "Quote request",
+  "site-survey": "Site survey request",
+  manpower: "Manpower hire",
+  emergency: "Emergency",
+  consultation: "Free consultation",
+  demo: "Demo request",
+  supplier: "Supplier registration",
+  careers: "Careers enquiry",
+  documents: "Document request",
+} as const;
+
+export type EnquiryType = keyof typeof enquiryTypes;

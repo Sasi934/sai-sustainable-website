@@ -47,7 +47,7 @@ export default function ScrollProgress() {
     >
       <div
         ref={bar}
-        className="h-full origin-left scale-x-0 bg-champagne"
+        className="h-full origin-left scale-x-0 bg-signal"
         style={{ willChange: "transform" }}
       />
     </div>

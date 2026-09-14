@@ -2,24 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { serviceGroups } from "@/data/services";
 import { divisions } from "@/data/divisions";
 
 /**
- * Desktop expanding navigation (§13).
+ * Desktop "Divisions" dropdown. Three entries, each in its own palette, with IT
+ * Solutions marked as the focus. Deliberately compact — the full service index
+ * lives on the division pages, not in the header.
  *
  * Opens on hover for pointer users and on click/Enter for keyboard users, and
- * closes on Escape or focus leaving the panel — so it is operable without a
- * mouse rather than hover-only.
+ * closes on Escape, outside click, or focus leaving the panel.
  */
-export default function MegaMenu() {
+export default function MegaMenu({ active = false }: { active?: boolean }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
   const closeTimer = useRef(0);
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      button.current?.focus();
+    };
     const onClick = (e: MouseEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false);
     };
@@ -41,91 +46,79 @@ export default function MegaMenu() {
     <div
       ref={wrap}
       className="relative"
-      onPointerEnter={() => {
+      onPointerEnter={(e) => {
+        if (e.pointerType !== "mouse") return;
         cancelClose();
         setOpen(true);
       }}
-      onPointerLeave={scheduleClose}
+      onPointerLeave={(e) => e.pointerType === "mouse" && scheduleClose()}
       onBlur={(e) => {
         if (!wrap.current?.contains(e.relatedTarget as Node)) setOpen(false);
       }}
     >
       <button
+        ref={button}
         type="button"
         aria-expanded={open}
-        aria-haspopup="true"
-        onClick={() => setOpen((v) => !v)}
-        className={`group relative flex items-center gap-1.5 text-[0.8rem] font-medium tracking-wide transition-colors ${
-          open ? "text-champagne" : "text-on-dark-muted hover:text-on-dark"
+        aria-controls="divisions-menu"
+        // A mouse user has already opened the panel by hovering, so their click must not
+        // toggle it shut again. Keyboard activation (detail === 0) toggles as expected.
+        onClick={(e) => setOpen((v) => (e.detail === 0 ? !v : true))}
+        className={`group relative flex items-center gap-1.5 text-[0.82rem] font-medium transition-colors ${
+          open || active ? "text-on-dark" : "text-on-dark-muted hover:text-on-dark"
         }`}
       >
-        Services
+        Divisions
+        <svg aria-hidden="true" viewBox="0 0 10 6" className={`h-1.5 w-2.5 transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
+          <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        </svg>
         <span
           aria-hidden="true"
-          className={`text-[0.6rem] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-        >
-          &#9660;
-        </span>
+          className={`absolute -bottom-1.5 left-0 h-px bg-signal transition-all duration-500 ease-luxe ${active ? "w-full" : "w-0"}`}
+        />
       </button>
 
       <div
-        className={`absolute left-1/2 top-[calc(100%+1.15rem)] z-50 w-[min(58rem,88vw)] -translate-x-1/2 border border-line-dark bg-ink/98 backdrop-blur-md transition-all duration-300 ease-luxe ${
-          open
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0"
+        id="divisions-menu"
+        className={`absolute left-1/2 top-[calc(100%+1.35rem)] z-50 w-[min(62rem,92vw)] -translate-x-1/2 border border-line-dark bg-ink shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)] transition-[opacity,transform] duration-300 ease-luxe ${
+          open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
         hidden={!open}
       >
-        <div className="grid grid-cols-[1.1fr_2fr]">
-          <div className="border-r border-line-dark p-7">
-            <p className="eyebrow text-on-dark-faint">Divisions</p>
-            <ul className="mt-5 flex flex-col gap-4">
-              {divisions.map((d) => (
-                <li key={d.key}>
-                  <Link
-                    href={d.href}
-                    className="group/item block"
-                    onClick={() => setOpen(false)}
-                  >
-                    <span className="text-lede text-on-dark transition-colors group-hover/item:text-champagne">
-                      {d.name}
-                    </span>
-                    <span className="mt-1 block text-[0.82rem] leading-snug text-on-dark-faint">
-                      {d.line}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="p-7">
-            <p className="eyebrow text-on-dark-faint">All services</p>
-            <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-6">
-              {serviceGroups.map((g) => (
-                <div key={g.slug}>
-                  <Link
-                    href={g.path}
-                    onClick={() => setOpen(false)}
-                    className="text-[0.86rem] font-semibold text-on-dark transition-colors hover:text-champagne"
-                  >
-                    {g.name}
-                  </Link>
-                  <ul className="mt-2 flex flex-col gap-1">
-                    {g.services.map((s) => (
-                      <li
-                        key={s.slug}
-                        className="text-[0.8rem] leading-snug text-on-dark-faint"
-                      >
-                        {s.name}
-                      </li>
-                    ))}
-                  </ul>
+        <ul className="grid grid-cols-3">
+          {divisions.map((d) => (
+            <li key={d.key} data-division={d.key} className="border-r border-line-dark bg-ink last:border-r-0">
+              <div className="flex h-full flex-col p-7">
+                <div className="flex items-center gap-2.5">
+                  <span aria-hidden="true" className="h-2 w-2 bg-signal" />
+                  <span className="tnum eyebrow text-on-dark-faint">{d.index}</span>
+                  {d.focus && <span className="eyebrow ml-auto text-signal">Focus</span>}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                <Link
+                  href={d.href}
+                  onClick={() => setOpen(false)}
+                  className="mt-4 text-[1.08rem] font-semibold leading-snug tracking-[-0.01em] text-on-dark transition-colors hover:text-signal"
+                >
+                  {d.name}
+                </Link>
+                <p className="mt-2 text-[0.82rem] leading-relaxed text-on-dark-muted">{d.line}</p>
+                <ul className="mt-5 flex flex-col border-t border-line-dark pt-4">
+                  {d.links.map((l) => (
+                    <li key={l.href}>
+                      <Link
+                        href={l.href}
+                        onClick={() => setOpen(false)}
+                        className="block py-1.5 text-[0.84rem] text-on-dark-muted transition-colors hover:text-on-dark"
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

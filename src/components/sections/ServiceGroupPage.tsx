@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import PageHero from "./PageHero";
 import CTABand from "./CTABand";
-import SceneFrame from "@/components/three/SceneFrame";
 import Parallax from "@/components/motion/Parallax";
 import MaskText from "@/components/motion/MaskText";
 import Reveal from "@/components/ui/Reveal";
 import { serviceGroups, type ServiceGroup } from "@/data/services";
+import { getDivision, ENVIRONMENTAL_BASE } from "@/data/divisions";
 
 /**
  * Shared composition for the five preserved service routes. Each route file is a
@@ -15,26 +15,36 @@ import { serviceGroups, type ServiceGroup } from "@/data/services";
  */
 export default function ServiceGroupPage({
   group,
-  scene,
+  band,
   sceneHeading,
   sceneBody,
 }: {
   group: ServiceGroup;
-  /** Optional art-directed scene band. Only used where it carries the story. */
-  scene?: "massing" | "containment";
+  /**
+   * Optional full-bleed photographic band (2D, parallax). Replaced the WebGL
+   * scene band under D-07 — same slot in the page rhythm, no 3D.
+   */
+  band?: { image: string; imageAlt: string };
   sceneHeading?: string;
   sceneBody?: string;
 }) {
   const others = serviceGroups.filter((g) => g.slug !== group.slug);
+  // All five preserved Atlantic Canada routes now sit inside Division 01.
+  const division = getDivision("environmental");
 
   return (
-    <>
+    <div data-division="environmental">
       <PageHero
-        eyebrow={group.division === "environmental" ? "01 — Environmental" : "03 — Construction"}
+        eyebrow={`${division.fullName} — Atlantic Canada`}
         heading={group.heading}
         intro={group.intro}
         image={group.image}
         imageAlt={group.imageAlt}
+        crumbs={[
+          { name: "Home", href: "/" },
+          { name: division.name, href: ENVIRONMENTAL_BASE },
+          { name: group.name, href: group.path },
+        ]}
       />
 
       <section className="bg-ivory py-[var(--section)] text-on-light">
@@ -81,9 +91,14 @@ export default function ServiceGroupPage({
         </div>
       </section>
 
-      {scene && (
+      {band && (
         <section className="relative flex min-h-[70svh] items-end overflow-hidden bg-ink text-on-dark">
-          <SceneFrame scene={scene} className="absolute inset-0" />
+          <Parallax className="absolute inset-0" amount={10}>
+            <div className="absolute inset-0">
+              <Image src={band.image} alt={band.imageAlt} fill sizes="100vw" className="object-cover opacity-60" />
+            </div>
+          </Parallax>
+          <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink via-ink/50 to-ink/10" />
           <div className="relative container pb-[clamp(3rem,7vw,6rem)] pt-[clamp(4rem,10vw,8rem)]">
             <MaskText as="h2" className="display max-w-[18ch] text-h2">
               {sceneHeading ?? ""}
@@ -108,7 +123,7 @@ export default function ServiceGroupPage({
                   <span className="text-lede font-semibold leading-snug">{g.name}</span>
                   <span
                     aria-hidden="true"
-                    className="text-forest-600 transition-transform duration-500 ease-luxe group-hover:translate-x-1.5"
+                    className="text-signal-ink transition-transform duration-500 ease-luxe group-hover:translate-x-1.5"
                   >
                     &rarr;
                   </span>
@@ -124,6 +139,6 @@ export default function ServiceGroupPage({
         body="Fully insured and certified, with 24/7 emergency response across Nova Scotia, New Brunswick & PEI."
         cta="Get a quote"
       />
-    </>
+    </div>
   );
 }

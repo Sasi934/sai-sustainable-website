@@ -10,64 +10,79 @@
 @source "../components";
 @source "../app";
 @source "../data";
+@source "../lib";
 
 /* ============================================================
-   SAI DESIGN TOKENS
-   Greens sampled from the official logo artwork (#0E6939 / #2C8748 / #78CB43).
-   Neutrals are biased green so they read as chosen, not inherited.
+   SAI GROUP DESIGN TOKENS
+   One structure, four palettes. The group palette is the default; each division
+   re-declares the same custom properties under [data-division], so every
+   component written against the semantic tokens adopts the right identity from
+   its nearest ancestor without a single conditional class.
+
+     group          charcoal · ivory · teal lead (IT is the strategic focus)
+     environmental  forest · moss · olive · earth · ivory
+     exim           navy · steel · ocean · champagne gold
+     it             charcoal · deep teal · teal · cyan · ivory
    ============================================================ */
 :root {
-  /* Brand */
-  --forest-900: #05200F;
-  --forest-800: #07301A;
-  --forest-700: #0A4526;
-  --forest-600: #0E6939; /* logo wordmark — primary */
-  --forest-500: #2C8748; /* logo mark */
-  --forest-400: #4CA463;
-  --lime: #78CB43;       /* logo mark — RESTRICTED, see note below */
-
-  /* Grounds */
-  --ink: #080B09;
-  --ink-raised: #0E1310;
-  --ink-soft: #151B17;
+  /* Dark grounds */
+  --ink: #080B0B;
+  --ink-raised: #0F1414;
+  --ink-soft: #151C1C;
 
   /* Light grounds */
-  --ivory: #F5F2EA;
-  --ivory-raised: #FBF9F4;
-  --ivory-dim: #E7E2D5;
+  --ivory: #F4F2EC;
+  --ivory-raised: #FBFAF6;
+  --ivory-dim: #E6E3DA;
 
   /* Type */
-  --on-dark: #EFEDE5;
-  --on-dark-muted: #9AA69C;
-  --on-dark-faint: #7D8A81; /* 5.5:1 on --ink, 4.8:1 on --forest-900 */
-  --on-light: #0C110E;
-  --on-light-muted: #4E5A51;
-  --on-light-faint: #5F6B62; /* 5.1:1 on --ivory */
+  --on-dark: #F1EFE8;
+  --on-dark-muted: #A3ABA8;
+  --on-dark-faint: #84908C; /* ≥4.6:1 on every division's --ink */
+  --on-light: #0C1110;
+  --on-light-muted: #4B5552;
+  --on-light-faint: #5B6663; /* ≥5:1 on every division's --ivory */
 
-  /* Accent — very subtle champagne, per brief §6. Hairlines and small caps only. */
-  --champagne: #C2AA7F;
-  --champagne-dim: #8C7A5A;
+  /* Accent roles.
+     --signal       small type, rules and marks on dark grounds
+     --signal-ink   small type, rules and marks on light grounds
+     --btn-dark*    solid CTA placed on a dark ground
+     --btn-light*   solid CTA placed on a light ground
+     --highlight    secondary accent, used sparingly (ticks, data points) */
+  --signal: #3FB7AD;
+  --signal-ink: #0E625C;
+  --btn-dark: #F1EFE8;
+  --btn-dark-hover: #3FB7AD;
+  --btn-dark-ink: #080B0B;
+  --btn-light: #0C1110;
+  --btn-light-hover: #0E625C;
+  --btn-light-ink: #F4F1E8;
+  --highlight: #4AC7E8;
+
+  /* Hero placeholder ground, used until the commissioned photograph is supplied. */
+  --hero-glow: rgba(18, 169, 160, 0.16);
 
   /* Lines */
-  --line-dark: rgba(239, 237, 229, 0.14);
-  --line-light: rgba(12, 17, 14, 0.14);
+  --line-dark: rgba(241, 239, 232, 0.14);
+  --line-light: rgba(12, 17, 16, 0.14);
 
-  /* Type scale — fluid, capped */
+  /* Type scale — fluid, capped. Tuned for a single sans family: large sans
+     settings read heavier than the old serif, so the top of the scale is lower. */
   --step--1: clamp(0.82rem, 0.79rem + 0.14vw, 0.9rem);
-  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.12rem);
-  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
-  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.15rem);
-  --step-3: clamp(1.9rem, 1.5rem + 1.9vw, 3.1rem);
-  --step-4: clamp(2.4rem, 1.7rem + 3.2vw, 4.6rem);
-  --step-5: clamp(3rem, 1.8rem + 5.6vw, 7.5rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.1rem);
+  --step-1: clamp(1.15rem, 1.07rem + 0.45vw, 1.42rem);
+  --step-2: clamp(1.4rem, 1.22rem + 0.9vw, 1.95rem);
+  --step-3: clamp(1.8rem, 1.45rem + 1.7vw, 2.85rem);
+  --step-4: clamp(2.25rem, 1.6rem + 2.9vw, 4.1rem);
+  --step-5: clamp(2.6rem, 1.55rem + 4.9vw, 6.1rem);
 
   /* Space */
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --section: clamp(5rem, 11vw, 11rem);
+  --section: clamp(4.5rem, 10vw, 9.5rem);
   --container: 84rem;
   --measure: 68ch;
 
-  /* Motion — one vocabulary, three durations (survey §13) */
+  /* Motion — one vocabulary, three durations */
   --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast: 320ms;
@@ -75,21 +90,67 @@
   --dur-slow: 1100ms;
 }
 
-/*
-  NOTE ON --lime: at any appreciable area this reads as the stereotypical
-  "green sustainability site" the brief rules out (§6). It is reserved for
-  state indicators and marks no larger than a few pixels. Do not use it for
-  fills, backgrounds, gradients or type.
-*/
+/* ---- Division 01 — Environmental, Restoration & Manpower ---- */
+[data-division="environmental"] {
+  --ink: #0B2118;
+  --ink-raised: #102C20;
+  --ink-soft: #123A27;
+  --ivory: #F4F1E8;
+  --ivory-raised: #FAF8F2;
+  --ivory-dim: #E8E3D5;
+  --signal: #B7A77A;
+  --signal-ink: #28563A;
+  --btn-dark: #E8E3D5;
+  --btn-dark-hover: #B7A77A;
+  --btn-dark-ink: #0B2118;
+  --btn-light: #123A27;
+  --btn-light-hover: #28563A;
+  --btn-light-ink: #F4F1E8;
+  --highlight: #8FA365;
+  --hero-glow: rgba(104, 123, 74, 0.22);
+}
+
+/* ---- Division 02 — EXIM ---- */
+[data-division="exim"] {
+  --ink: #07131F;
+  --ink-raised: #0B1C2B;
+  --ink-soft: #0D2233;
+  --ivory: #F5F3ED;
+  --ivory-raised: #FBFAF6;
+  --ivory-dim: #E9E6DD;
+  --signal: #C7A365;
+  --signal-ink: #315B72;
+  --btn-dark: #B89452;
+  --btn-dark-hover: #CDAE72;
+  --btn-dark-ink: #07131F;
+  --btn-light: #0D2233;
+  --btn-light-hover: #173A52;
+  --btn-light-ink: #F5F3ED;
+  --highlight: #B89452;
+  --hero-glow: rgba(49, 91, 114, 0.3);
+}
+
+/* ---- Division 03 — IT Solutions (strategic focus) ---- */
+[data-division="it"] {
+  --ink: #050809;
+  --ink-raised: #0B1112;
+  --ink-soft: #0F2928;
+  --ivory: #F4F1E8;
+  --ivory-raised: #FAF9F5;
+  --ivory-dim: #DDE9E4;
+  --signal: #12A9A0;
+  --signal-ink: #0E625C;
+  --btn-dark: #12A9A0;
+  --btn-dark-hover: #4AC7E8;
+  --btn-dark-ink: #050809;
+  --btn-light: #0E625C;
+  --btn-light-hover: #0B4F4A;
+  --btn-light-ink: #F4F1E8;
+  --highlight: #4AC7E8;
+  --hero-glow: rgba(18, 169, 160, 0.2);
+}
 
 @theme inline {
-  --color-forest-900: var(--forest-900);
-  --color-forest-800: var(--forest-800);
-  --color-forest-700: var(--forest-700);
-  --color-forest-600: var(--forest-600);
-  --color-forest-500: var(--forest-500);
-  --color-forest-400: var(--forest-400);
-  --color-lime: var(--lime);
   --color-ink: var(--ink);
   --color-ink-raised: var(--ink-raised);
   --color-ink-soft: var(--ink-soft);
@@ -102,8 +163,15 @@
   --color-on-light: var(--on-light);
   --color-on-light-muted: var(--on-light-muted);
   --color-on-light-faint: var(--on-light-faint);
-  --color-champagne: var(--champagne);
-  --color-champagne-dim: var(--champagne-dim);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-btn-dark: var(--btn-dark);
+  --color-btn-dark-hover: var(--btn-dark-hover);
+  --color-btn-dark-ink: var(--btn-dark-ink);
+  --color-btn-light: var(--btn-light);
+  --color-btn-light-hover: var(--btn-light-hover);
+  --color-btn-light-ink: var(--btn-light-ink);
+  --color-highlight: var(--highlight);
   --color-line-dark: var(--line-dark);
   --color-line-light: var(--line-light);
 
@@ -116,8 +184,10 @@
   --text-h1: var(--step-4);
   --text-hero: var(--step-5);
 
-  --font-display: var(--font-instrument), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* ONE family, site-wide. --font-display is kept as an alias so no call site
+     can reintroduce a second face by accident. */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-sans);
 
   --ease-luxe: var(--ease-luxe);
 }
@@ -129,9 +199,6 @@
 */
 
 @layer base {
-  /* ============================================================
-     BASE
-     ============================================================ */
   *,
   *::before,
   *::after { box-sizing: border-box; }
@@ -145,7 +212,7 @@
     margin: 0;
     background: var(--ivory);
     color: var(--on-light);
-    font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     font-size: var(--step-0);
     line-height: 1.62;
     -webkit-font-smoothing: antialiased;
@@ -155,7 +222,7 @@
 
   h1, h2, h3, h4 {
     margin: 0;
-    font-weight: 400;
+    font-weight: 600;
     text-wrap: balance;
   }
 
@@ -165,15 +232,19 @@
 
   img, svg, video { display: block; max-width: 100%; }
 
-  button { font: inherit; color: inherit; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+
+  /* Single typeface, no exceptions: code-like elements inherit rather than
+     falling back to Tailwind's monospace stack. */
+  code, kbd, pre, samp { font-family: inherit; }
 
   ::selection {
-    background: var(--forest-600);
+    background: var(--signal-ink);
     color: var(--on-dark);
   }
 
   :focus-visible {
-    outline: 2px solid var(--forest-500);
+    outline: 2px solid var(--signal);
     outline-offset: 3px;
     border-radius: 2px;
   }
@@ -194,9 +265,6 @@
 }
 
 @layer components {
-  /* ============================================================
-     PRIMITIVES
-     ============================================================ */
   .container {
     width: 100%;
     max-width: var(--container);
@@ -211,14 +279,18 @@
     font-weight: 600;
   }
 
+  /* Headline treatment. Same family as body — hierarchy comes from size,
+     weight, tracking and leading only. */
   .display {
-    font-family: var(--font-instrument), Georgia, serif;
-    font-weight: 400;
-    line-height: 1.03;
-    letter-spacing: -0.018em;
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.032em;
   }
 
   .measure { max-width: var(--measure); }
+
+  /* Tabular figures for step numbers and data labels. */
+  .tnum { font-variant-numeric: tabular-nums; }
 
   /*
     Scroll-reveal base state, gated on the native `scripting` media feature so no
@@ -236,21 +308,114 @@
   }
   .reveal.is-in { opacity: 1; transform: none; }
   }
+
+  /* ============================================================
+     CINEMATIC HERO — pure CSS, so the sequence starts at first paint with no
+     hydration flash, and still ends fully visible if scripting never runs.
+       1 dark base → 2 image reveal → 3 slow drift → 4 eyebrow
+       → 5 heading (word mask) → 6 sub-text → 7 CTAs
+     ============================================================ */
+  .hero-media {
+    animation:
+      hero-reveal 1.6s var(--ease-luxe) both,
+      hero-drift 24s ease-in-out 1.6s infinite alternate;
+    transform-origin: 60% 50%;
+  }
+  .hero-step {
+    animation: hero-rise 0.9s var(--ease-luxe) both;
+    animation-delay: calc(var(--d, 0) * 1ms);
+  }
+  .hero-word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
+  }
+  .hero-word > span {
+    display: inline-block;
+    animation: hero-word 1s var(--ease-luxe) both;
+    animation-delay: calc(520ms + var(--i, 0) * 55ms);
+  }
+
+  /* Computer-vision overlay: boxes draw on after the image has settled. */
+  .cv-box {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: cv-draw 1.4s var(--ease-inout) forwards;
+    animation-delay: calc(1500ms + var(--i, 0) * 260ms);
+  }
+  .cv-fade {
+    opacity: 0;
+    animation: cv-fade 0.8s ease-out forwards;
+    animation-delay: calc(1900ms + var(--i, 0) * 260ms);
+  }
+  .cv-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cv-pulse 2.8s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 400ms);
+  }
+
+  /* Overlays below the fold wait for their section to reveal before drawing. */
+  @media (scripting: enabled) {
+    .reveal:not(.is-in) :is(.cv-box, .cv-fade, .cv-pulse) { animation-play-state: paused; }
+  }
+
+  /* Process rail: the connecting line fills as the section enters. */
+  .rail-fill {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 1.8s var(--ease-inout) 200ms;
+  }
+  .is-in .rail-fill { transform: scaleX(1); }
+
+  /* Fine film grain for placeholder grounds. */
+  .grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+  }
+}
+
+@keyframes hero-reveal {
+  from { opacity: 0; transform: scale(1.07); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-drift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to   { transform: scale(1.04) translate3d(-0.8%, 0, 0); }
+}
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes hero-word {
+  from { transform: translateY(108%); }
+  to   { transform: none; }
+}
+@keyframes cv-draw { to { stroke-dashoffset: 0; } }
+@keyframes cv-fade { to { opacity: 1; } }
+@keyframes cv-pulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(1.9); }
 }
 
 /* ============================================================
-   REDUCED MOTION — a real branch, not a disable (survey §13)
+   REDUCED MOTION — a real branch, not a disable
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
   .reveal { opacity: 1; transform: none; }
+  .hero-media { animation: none !important; }
 }
 
 @layer components {

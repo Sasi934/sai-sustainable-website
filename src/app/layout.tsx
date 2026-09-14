@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Manrope } from "next/font/google";
+import { Geist } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
@@ -13,17 +13,14 @@ import PageTransition from "@/components/motion/PageTransition";
 import { JsonLd, localBusinessSchema } from "@/lib/schema";
 import { SITE_URL, SITE_NAME, GA_ID } from "@/lib/site";
 
-const instrument = Instrument_Serif({
+/*
+  ONE typeface for the whole site — navigation, headings, body, buttons, forms,
+  footer. Hierarchy comes from size, weight, tracking and leading only.
+  Variable font, so every weight ships in a single file.
+*/
+const geist = Geist({
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-instrument",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -31,11 +28,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "Complete Environmental Restoration Solutions | SAI Services | Asbestos Abatement | SAI Sustainable Services Inc.",
+      "SAI Group — Environmental Restoration, Global Trade (EXIM) & IT/AI Solutions | SAI Sustainable Services Inc.",
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "SAI Sustainable Services Inc. offers comprehensive environmental and restoration solutions across Atlantic Canada, including mold removal, asbestos abatement, trauma cleanup, waste disposal, and demolition.",
+    "SAI Group brings together three divisions: Environmental, Restoration & Manpower; EXIM global sourcing and trade; and IT Solutions for web, software, AI and AI road defect detection.",
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME }],
   formatDetection: { telephone: true, address: true, email: true },
@@ -44,11 +41,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     /* suppressHydrationWarning: Lenis adds a class to <html> on mount. */
-    <html
-      lang="en-CA"
-      className={`${instrument.variable} ${manrope.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en-CA" className={geist.variable} suppressHydrationWarning>
       <body>
         <a className="skip" href="#main">
           Skip to content

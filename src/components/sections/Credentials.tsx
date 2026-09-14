@@ -12,10 +12,10 @@ import { certifications, company, homepage } from "@/data/company";
  */
 export default function Credentials() {
   return (
-    <section className="bg-forest-900 py-[var(--section)] text-on-dark">
+    <section className="bg-ink py-[var(--section)] text-on-dark">
       <div className="container grid gap-16 lg:grid-cols-12">
         <Reveal className="lg:col-span-5">
-          <p className="eyebrow text-champagne">Certified &amp; insured</p>
+          <p className="eyebrow text-signal">Certified &amp; insured</p>
           <MaskText as="h2" className="display mt-5 text-h2">
             Independently certified, and audited on safety.
           </MaskText>
@@ -31,7 +31,7 @@ export default function Credentials() {
                 as="li"
                 key={c.name}
                 delay={i * 120}
-                className="flex items-center gap-6 bg-forest-900 py-7"
+                className="flex items-center gap-6 bg-ink py-7"
               >
                 <Image
                   src={c.image}
@@ -54,7 +54,7 @@ export default function Credentials() {
                 <li key={w} className="flex items-start gap-3 text-[0.95rem] text-on-dark-muted">
                   <span
                     aria-hidden="true"
-                    className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-lime"
+                    className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-highlight"
                   />
                   {w}
                 </li>

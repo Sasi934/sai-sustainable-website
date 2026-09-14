@@ -15,6 +15,8 @@ export async function POST(request: Request) {
       message,
       division,
       company,
+      enquiryType,
+      organisation,
     } = data;
 
     // Honeypot — silently reject bots
@@ -57,16 +59,27 @@ export async function POST(request: Request) {
       );
     }
 
+    // Optional routing fields. Single-line and length-capped, because both reach the subject line.
+    const oneLine = (v: unknown, max = 120) =>
+      typeof v === "string" ? v.replace(/[\r\n]+/g, " ").trim().slice(0, max) : "";
+    const intent = oneLine(enquiryType, 60);
+    const org = oneLine(organisation);
+    const divisionLabel =
+      ({ environmental: "Environmental, Restoration & Manpower", exim: "EXIM", it: "IT Solutions" } as Record<string, string>)[
+        String(division)
+      ] ?? "Not specified";
+
     const { error } = await resend.emails.send({
       from: "Sai Sustainable Website <website@saisustainable.com>",
       to: process.env.ENQUIRY_TO || "info@saisustainable.com",
       replyTo: email,
-      subject: `Website Enquiry — ${name} ${lastName}`,
+      subject: `Website Enquiry — ${divisionLabel}${intent ? ` — ${intent}` : ""} — ${oneLine(name, 60)} ${oneLine(lastName, 60)}`,
       text: `
 New website enquiry
 
-Division: ${division || "Not specified"}
-
+Division: ${divisionLabel}
+Enquiry type: ${intent || "General"}
+${org ? `Organisation: ${org}\n` : ""}
 Name: ${name} ${lastName}
 Telephone: ${telephone}
 Email: ${email}

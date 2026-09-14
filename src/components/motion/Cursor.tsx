@@ -64,7 +64,7 @@ export default function Cursor() {
     <div
       ref={dot}
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-[70] h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-champagne mix-blend-difference"
+      className="pointer-events-none fixed left-0 top-0 z-[70] h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-signal mix-blend-difference"
       style={{ willChange: "transform" }}
     />
   );

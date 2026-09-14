@@ -83,22 +83,29 @@ if ($errors) {
     respond(422, ['ok' => false, 'errors' => $errors]);
 }
 
-$division = in_array($field('division'), ['environmental', 'it', 'construction'], true)
+$division = in_array($field('division'), ['environmental', 'exim', 'it', 'construction'], true)
     ? $field('division')
     : 'unspecified';
+
+// Optional routing fields (SAI Group form, 2026-09-14). Length-capped; header-safe below.
+$intent       = mb_substr($field('enquiryType'), 0, 60);
+$organisation = mb_substr($field('organisation'), 0, 120);
 
 // Strip CR/LF from anything that reaches a header, so nothing can inject one.
 $safeHeader = static fn(string $v): string => str_replace(["\r", "\n"], ' ', $v);
 
 $subject = $safeHeader(sprintf(
-    'Website enquiry — %s — %s %s',
+    'Website enquiry — %s%s — %s %s',
     $division,
+    $intent !== '' ? ' — ' . $intent : '',
     $field('name'),
     $field('lastName')
 ));
 
 $body = implode("\n", [
     'Division: ' . $division,
+    'Enquiry type: ' . ($intent !== '' ? $intent : 'General'),
+    'Organisation: ' . ($organisation !== '' ? $organisation : '-'),
     'Name: ' . $field('name') . ' ' . $field('lastName'),
     'Telephone: ' . $field('telephone'),
     'Email: ' . $email,

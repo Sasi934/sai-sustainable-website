@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageHero from "@/components/sections/PageHero";
 import CTABand from "@/components/sections/CTABand";
 import Reveal from "@/components/ui/Reveal";
+import Capabilities from "@/components/sections/Capabilities";
 import { pageMeta } from "@/lib/seo";
 import { JsonLd, breadcrumbSchema } from "@/lib/schema";
 import { serviceGroups } from "@/data/services";
@@ -25,27 +26,40 @@ export default function Page() {
       />
 
       <PageHero
-        eyebrow="Full capability index"
+        eyebrow="SAI Group — full capability index"
         heading="Services"
-        intro="Fifteen services across environmental, restoration, waste, demolition and construction — delivered by one certified team."
+        intro="Every service across SAI's three divisions: Environmental, Restoration & Manpower; EXIM; and IT Solutions."
         image="/img/halifax-best-renovation-services-EuIl7Xm2IAvPdX3H.jpg"
-        imageAlt="SAI Sustainable Services crew on site"
+        imageAlt="Interior stripped back to framing mid-renovation"
+        crumbs={[
+          { name: "Home", href: "/" },
+          { name: "Services", href: "/services" },
+        ]}
       />
 
-      <section className="bg-ivory py-[var(--section)] text-on-light">
+      <Capabilities />
+
+      {/* Preserved: the fifteen Atlantic Canada services this URL ranks for. */}
+      <section data-division="environmental" aria-labelledby="atlantic-services" className="border-t border-line-light bg-ivory py-[var(--section)] text-on-light">
         <div className="container flex flex-col gap-[clamp(3.5rem,7vw,5.5rem)]">
+          <Reveal>
+            <p className="eyebrow text-signal-ink">Environmental, Restoration & Manpower — Atlantic Canada</p>
+            <h2 id="atlantic-services" className="display mt-4 max-w-[24ch] text-h2">
+              Abatement, restoration, waste, demolition and renovation in Halifax, Dartmouth and across Atlantic Canada.
+            </h2>
+          </Reveal>
           {serviceGroups.map((g, gi) => (
             <Reveal key={g.slug} delay={gi * 60}>
               <div className="grid gap-8 lg:grid-cols-12 lg:gap-14">
                 <div className="lg:col-span-4">
-                  <p className="eyebrow text-forest-600">
+                  <p className="eyebrow text-signal-ink">
                     {String(gi + 1).padStart(2, "0")}
                   </p>
-                  <h2 className="display mt-3 text-h3">
-                    <Link href={g.path} className="transition-colors hover:text-forest-600">
+                  <h3 className="display mt-3 text-h3">
+                    <Link href={g.path} className="transition-colors hover:text-signal-ink">
                       {g.name}
                     </Link>
-                  </h2>
+                  </h3>
                   <p className="mt-5 max-w-[40ch] text-[0.95rem] leading-relaxed text-on-light-muted">
                     {g.intro}
                   </p>
@@ -54,7 +68,7 @@ export default function Page() {
                 <ul className="lg:col-span-7 lg:col-start-6">
                   {g.services.map((s) => (
                     <li key={s.slug} className="border-b border-line-light py-5 first:border-t">
-                      <h3 className="text-lede font-semibold">{s.name}</h3>
+                      <h4 className="text-lede font-semibold">{s.name}</h4>
                       <p className="mt-2 max-w-[62ch] text-[0.95rem] leading-relaxed text-on-light-muted">
                         {s.summary}
                       </p>

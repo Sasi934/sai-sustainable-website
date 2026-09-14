@@ -1,6 +1,9 @@
 import { SITE_URL, SITE_NAME } from "./site";
-import { company, contact, certifications } from "@/data/company";
+import { company, contact, certifications, group } from "@/data/company";
 import { serviceGroups } from "@/data/services";
+import { divisions } from "@/data/divisions";
+import { eximServices } from "@/data/exim";
+import { itServices } from "@/data/it-solutions";
 
 /**
  * Structured data the current site does not have. For a local services business
@@ -12,6 +15,7 @@ export function localBusinessSchema() {
     "@type": "LocalBusiness",
     "@id": `${SITE_URL}/#organization`,
     name: SITE_NAME,
+    alternateName: group.name,
     url: SITE_URL,
     description: company.announcement,
     telephone: contact.phones.map((p) => p.number),
@@ -70,15 +74,64 @@ export function localBusinessSchema() {
   };
 }
 
-export function serviceSchema(name: string, description: string, path: string) {
+/**
+ * The group and its three divisions, for the homepage. References the
+ * LocalBusiness above by @id rather than restating it, so there is one entity
+ * with three departments — not four competing organisations.
+ */
+export function groupSchema() {
+  const offers: Record<string, string[]> = {
+    environmental: serviceGroups.filter((g) => g.division === "environmental").flatMap((g) => g.services.map((s) => s.name)),
+    exim: eximServices.map((s) => s.name),
+    it: itServices.map((s) => s.name),
+  };
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
+    name: SITE_NAME,
+    alternateName: group.name,
+    url: SITE_URL,
+    logo: `${SITE_URL}/img/untitled-design-1-YanB4V4EnLU44Jy6.png`,
+    email: contact.emails[0].address,
+    department: divisions.map((d) => ({
+      "@type": "Organization",
+      "@id": `${SITE_URL}${d.href}#division`,
+      name: d.fullName,
+      description: d.line,
+      url: `${SITE_URL}${d.href}`,
+      parentOrganization: { "@id": `${SITE_URL}/#organization` },
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: `${d.fullName} services`,
+        itemListElement: offers[d.key].map((name) => ({
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name },
+        })),
+      },
+    })),
+  };
+}
+
+export function serviceSchema(
+  name: string,
+  description: string,
+  path: string,
+  opts: { division?: string; areaServed?: string | null } = {},
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     name,
     description,
     url: `${SITE_URL}${path}`,
-    provider: { "@id": `${SITE_URL}/#organization` },
-    areaServed: { "@type": "AdministrativeArea", name: "Atlantic Canada" },
+    provider: { "@id": opts.division ? `${SITE_URL}${opts.division}#division` : `${SITE_URL}/#organization` },
+    // Only the Atlantic Canada routes assert a service area. Group and IT/EXIM
+    // pages leave it out rather than guess at a market SAI hasn't confirmed.
+    ...(opts.areaServed === null
+      ? {}
+      : { areaServed: { "@type": "AdministrativeArea", name: opts.areaServed ?? "Atlantic Canada" } }),
   };
 }
 

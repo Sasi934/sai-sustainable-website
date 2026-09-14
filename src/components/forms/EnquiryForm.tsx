@@ -1,20 +1,65 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
-import { contactPage, enquiryDivisions } from "@/data/pages";
+import { useEffect, useId, useRef, useState } from "react";
+import { contactPage, enquiryDivisions, enquiryTypes, type EnquiryType } from "@/data/pages";
+
+type DivisionValue = (typeof enquiryDivisions)[number]["value"];
 
 type Errors = Record<string, string>;
 type Status = "idle" | "sending" | "sent" | "error";
 
 const field =
-  "w-full border-b border-line-light bg-transparent py-3 text-on-light outline-none transition-colors placeholder:text-on-light-faint focus:border-forest-600";
+  "w-full border-b border-line-light bg-transparent py-3 text-on-light outline-none transition-colors placeholder:text-on-light-faint focus:border-signal-ink";
 
-export default function EnquiryForm() {
+export default function EnquiryForm({
+  defaultDivision = "environmental",
+  type,
+  hint,
+  showOrganisation = false,
+}: {
+  defaultDivision?: DivisionValue;
+  /** Fixed enquiry intent for dedicated pages (demo, supplier, careers …). */
+  type?: EnquiryType;
+  /** Helper text under the message field. */
+  hint?: string;
+  /** Adds an optional organisation field (suppliers, demo requests). */
+  showOrganisation?: boolean;
+}) {
   const id = useId();
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [message, setMessage] = useState("");
   const liveRef = useRef<HTMLParagraphElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  /*
+    Deep links such as /contact-us?division=exim&type=quote pre-select the form.
+    Applied straight to the uncontrolled inputs after mount rather than through
+    state, so the server render and hydration stay identical and nothing
+    re-renders. Only known values are accepted.
+  */
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    const params = new URLSearchParams(window.location.search);
+
+    const division = params.get("division");
+    if (division && enquiryDivisions.some((d) => d.value === division)) {
+      const radio = form.querySelector<HTMLInputElement>(`input[name="division"][value="${division}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    const intent = params.get("type");
+    if (!type && intent && intent in enquiryTypes) {
+      const hidden = form.querySelector<HTMLInputElement>('input[name="enquiryType"]');
+      if (hidden) hidden.value = enquiryTypes[intent as EnquiryType];
+      const note = form.querySelector<HTMLElement>("[data-intent]");
+      if (note) {
+        note.textContent = enquiryTypes[intent as EnquiryType];
+        note.hidden = false;
+      }
+    }
+  }, [type]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -103,24 +148,27 @@ export default function EnquiryForm() {
   const f = contactPage.form;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-7">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-7">
+      <input type="hidden" name="enquiryType" defaultValue={type ? enquiryTypes[type] : ""} />
+      <p data-intent hidden className="eyebrow -mb-2 text-signal-ink" />
+
       {/* Which division the enquiry is for */}
       <fieldset className="border-0 p-0">
         <legend className="eyebrow text-on-light-faint">
-          What do you need?
+          Which division?
         </legend>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {enquiryDivisions.map((d, i) => (
+          {enquiryDivisions.map((d) => (
             <label
               key={d.value}
-              className="cursor-pointer border border-line-light px-4 py-2 text-[0.82rem] transition-colors has-checked:border-forest-600 has-checked:bg-forest-600 has-checked:text-on-dark"
+              className="cursor-pointer rounded-[2px] border border-line-light px-4 py-2.5 text-[0.84rem] transition-colors hover:border-on-light/40 has-checked:border-btn-light has-checked:bg-btn-light has-checked:text-btn-light-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-signal-ink"
             >
               <input
                 type="radio"
                 name="division"
                 value={d.value}
-                defaultChecked={i === 0}
+                defaultChecked={d.value === defaultDivision}
                 className="sr-only"
               />
               {d.label}
@@ -164,6 +212,13 @@ export default function EnquiryForm() {
           required
           error={errors.email}
         />
+
+        {/* Named "organisation", never "company" — that name is the honeypot. */}
+        {showOrganisation && (
+          <div className="sm:col-span-2">
+            <Field id={`${id}-org`} name="organisation" label="Organisation" />
+          </div>
+        )}
       </div>
 
       {/* Message */}
@@ -175,13 +230,18 @@ export default function EnquiryForm() {
           {f.message}
           <span aria-hidden="true"> *</span>
         </label>
+        {hint && (
+          <p id={`${id}-msg-hint`} className="mt-2 text-[0.86rem] leading-relaxed text-on-light-muted">
+            {hint}
+          </p>
+        )}
 
         <textarea
           id={`${id}-msg`}
           name="message"
           rows={5}
           aria-invalid={errors.message ? true : undefined}
-          aria-describedby={errors.message ? `${id}-msg-err` : undefined}
+          aria-describedby={[hint && `${id}-msg-hint`, errors.message && `${id}-msg-err`].filter(Boolean).join(" ") || undefined}
           className={`${field} mt-2 resize-y ${
             errors.message ? "border-[#9E2F26]" : ""
           }`}
@@ -217,7 +277,7 @@ export default function EnquiryForm() {
         <button
           type="submit"
           disabled={status === "sending"}
-          className="rounded-[2px] bg-forest-600 px-8 py-4 text-[0.8rem] font-semibold uppercase tracking-[0.14em] text-on-dark transition-colors hover:bg-forest-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-[2px] bg-btn-light px-8 py-4 text-[0.8rem] font-semibold uppercase tracking-[0.14em] text-btn-light-ink transition-colors hover:bg-btn-light-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "sending" ? "Sending…" : f.submit}
         </button>
@@ -229,7 +289,7 @@ export default function EnquiryForm() {
           className={`text-[0.9rem] ${
             status === "error"
               ? "text-[#9E2F26]"
-              : "text-forest-600"
+              : "text-signal-ink"
           }`}
         >
           {message}
